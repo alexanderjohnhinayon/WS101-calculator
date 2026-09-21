@@ -1,165 +1,227 @@
-<!DOCTYPE html>
 <?php
-//echo 'Hello World.';
-// This is a one-line c++ style comment
-    /* This is a multi line comment
-       yet another line of comment */
-	   
-//phpinfo();
 
-//echo 'Hello World!!!/n Below is a basic calculator I made!';
-echo '<span style="color:#196719;text-align:center;">Hello World!. Below is a basic calculator I made!</span>';
-//echo  <span style="color:#AFA;text-align:center;">nl2br ("Hellow World! \n Below is a basic calculator I made!")</span>;
-
-ini_set('display_errors',0);
-	
-	$result = 0; // Initialize result variable
-	
-	if(isset($_POST['submit']))
-	{
-		$num1=$_POST['number1'];
-		$num2=$_POST['number2'];
-		if(is_numeric($num1) && is_numeric($num2))
-		{
-			if(isset($_POST['g']))
-			{
-				$operation=$_POST['g'];
-				
-				switch($operation)
-				{
-					case '+' :
-					$result=$num1+$num2;
-					break;
-					
-					case '-' :
-					$result=$num1-$num2;
-					break;
-					
-					case '*' :
-					$result=$num1*$num2;
-					break;
-					
-					
-					case '/' :
-					$result=$num1/$num2;
-					break;
-					
-					case '%' :
-					$result=$num1%$num2;
-					break;
-				}
-				
-				
-			}
-			else
-			{
-				echo "Please select operation";
-			}
-			
-		}
-		else
-		{
-			echo "Please enter numeric values only";
-		}
-	}
 ?>
-
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<style> 
-#group {
-	animation-fill-mode: forwards; /*animation will stop at last frame and won't reset to start!!!*/
-    -webkit-animation: mymove 5s 1; /* Safari 4.0 - 8.0 */
-    animation: mymove 5s 1;
-	  position: absolute;
-       left: 5px;
-}
+<meta charset="UTF-8">
+<title>Numpad Calculator</title>
+<style>
+    * {
+        box-sizing: border-box;
+    }
 
-/*#get {
-	
-	 position: absolute;
-     left: 5px;
-}*/
+    body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: #1e1e2f;
+        transition: background-color 0.6s ease;
+    }
 
-div {
-    width: 100px;
-    height: 50px;
-    background-color: red;
-    font-weight: bold;
-    position: relative;
-	/*position: absolute;*/
-    left: 5px;
-}
+    .calculator {
+        width: 300px;
+        background: #2b2b3d;
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
 
-/* Safari 4.0 - 8.0 */
-#div1 {-webkit-animation-timing-function: linear;}
-#div2 {-webkit-animation-timing-function: ease;}
-#div3 {-webkit-animation-timing-function: ease-in;}
-#div4 {-webkit-animation-timing-function: ease-out;}
-#div5 {-webkit-animation-timing-function: ease-in-out;}
+    .display {
+        background: #101018;
+        color: #fff;
+        border-radius: 10px;
+        padding: 20px 15px;
+        margin-bottom: 15px;
+        text-align: right;
+        min-height: 70px;
+        word-wrap: break-word;
+    }
 
-/* Standard syntax */
-#div1 {animation-timing-function: linear;}
-#div2 {animation-timing-function: ease;}
-#div3 {animation-timing-function: ease-in;}
-#div4 {animation-timing-function: ease-out;}
-#div5 {animation-timing-function: ease-in-out;}
+    .display .expression {
+        font-size: 14px;
+        color: #9a9ac0;
+        min-height: 18px;
+    }
 
-/* Safari 4.0 - 8.0 */
-@-webkit-keyframes mymove {
-    from {left: 0px;}
-    to {left: 300px;}
-}
+    .display .current {
+        font-size: 32px;
+        font-weight: bold;
+        overflow-x: auto;
+    }
 
-/* Standard syntax */
-@keyframes mymove {
-    from {left: 0px;}
-    to {left: 300px;}
-}
+    .pad {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+    }
+
+    button {
+        border: none;
+        border-radius: 10px;
+        padding: 18px 0;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+        color: #fff;
+        background: #3a3a55;
+        transition: transform 0.08s ease, filter 0.2s ease;
+    }
+
+    button:active {
+        transform: scale(0.94);
+    }
+
+    button:hover {
+        filter: brightness(1.15);
+    }
+
+    .btn-num {
+        background: #3a3a55;
+    }
+
+    .btn-op {
+        background: #4d5bd9;
+    }
+
+    .btn-func {
+        background: #565676;
+    }
+
+    .btn-equals {
+        background: #16a34a;
+        grid-column: span 2;
+    }
+
+    .btn-zero {
+        grid-column: span 2;
+    }
 </style>
 </head>
 <body>
 
-<p><strong>Note:</strong> The animation-timing-funtion property is not supported in Internet Explorer 9 and earlier versions.</p>
+<div class="calculator">
+    <div class="display">
+        <div class="expression" id="expression"></div>
+        <div class="current" id="current">0</div>
+    </div>
 
-<!--<div id="div1">linear</div>
-<div id="div2">ease</div>
-<div id="div3">ease-in</div>
-<div id="div4">ease-out</div>
-<div id="div5">ease-in-out</div>-->
+    <div class="pad">
+        <button class="btn-func" onclick="clearAll()">C</button>
+        <button class="btn-func" onclick="backspace()">⌫</button>
+        <button class="btn-func" onclick="chooseOperation('%')">%</button>
+        <button class="btn-op" onclick="chooseOperation('/')">÷</button>
 
-<div id="get">
-		<form method="post" action="BasicCalculator.php">
-<div id="group">        
-<div id="div1">Enter 1st number: <input type="text" name="number1" value="<?php if(isset($num1)) {echo $num1;} ?> " > </div></br> </br>
-        <div id="div2">Enter 2nd number: <input type="text" name="number2"  value="<?php if(isset($num2)) {echo $num2;} ?> " ></div> </br> </br>
-Select Operation: </br></br>
-                        <div id="div3"><input type="radio" name="g" value="+"> Addition</div> <br/>
-                        <div id="div4"><input type="radio" name="g" value="-"> Subtraction</div></br>
-                        <div id="div1"><input type="radio" name="g" value="*">Multiplication</div> <br/>
-                        <div id="div2"><input type="radio" name="g" value="/">Division</div> </br>
-                        <div id="div3"><input type="radio" name="g" value="%">Modulo</div> <br/><br/>
-                        <div id="div4"><input type="submit" name="submit"></div><br/><br/>
-                        <div id="div5"><h2 style="color:blue"> Output: <?php echo isset($result) ? $result : ''; ?> </h2></div>
-        </div>
-</form>
+        <button class="btn-num" onclick="appendNumber('7')">7</button>
+        <button class="btn-num" onclick="appendNumber('8')">8</button>
+        <button class="btn-num" onclick="appendNumber('9')">9</button>
+        <button class="btn-op" onclick="chooseOperation('*')">×</button>
 
+        <button class="btn-num" onclick="appendNumber('4')">4</button>
+        <button class="btn-num" onclick="appendNumber('5')">5</button>
+        <button class="btn-num" onclick="appendNumber('6')">6</button>
+        <button class="btn-op" onclick="chooseOperation('-')">−</button>
+
+        <button class="btn-num" onclick="appendNumber('1')">1</button>
+        <button class="btn-num" onclick="appendNumber('2')">2</button>
+        <button class="btn-num" onclick="appendNumber('3')">3</button>
+        <button class="btn-op" onclick="chooseOperation('+')">+</button>
+
+        <button class="btn-num btn-zero" onclick="appendNumber('0')">0</button>
+        <button class="btn-num" onclick="appendNumber('.')">.</button>
+        <button class="btn-equals" onclick="calculate()">=</button>
+    </div>
 </div>
 
-
 <script>
-//Your Javascript Code
+let currentValue = '0';
+let previousValue = '';
+let operation = null;
 
-for(let i =5; i < window.width(); i++)
-{
-    document.getElementById('YOURELEMENT').left = i + 'px';
+const currentEl = document.getElementById('current');
+const expressionEl = document.getElementById('expression');
+
+function updateDisplay() {
+    currentEl.textContent = currentValue;
+    expressionEl.textContent = previousValue !== '' ? `${previousValue} ${operation ?? ''}` : '';
 }
 
-</script
+function appendNumber(digit) {
+    if (digit === '.' && currentValue.includes('.')) return;
+    if (currentValue === '0' && digit !== '.') {
+        currentValue = digit;
+    } else {
+        currentValue += digit;
+    }
+    updateDisplay();
+}
 
+function chooseOperation(op) {
+    if (currentValue === '' ) return;
+    if (previousValue !== '') {
+        calculate();
+    }
+    operation = op;
+    previousValue = currentValue;
+    currentValue = '0';
+    updateDisplay();
+}
 
+function clearAll() {
+    currentValue = '0';
+    previousValue = '';
+    operation = null;
+    updateDisplay();
+}
+
+function backspace() {
+    currentValue = currentValue.length > 1 ? currentValue.slice(0, -1) : '0';
+    updateDisplay();
+}
+
+function calculate() {
+    let result;
+    const prev = parseFloat(previousValue);
+    const curr = parseFloat(currentValue);
+    if (isNaN(prev) || isNaN(curr) || operation === null) return;
+
+    switch (operation) {
+        case '+':
+            result = prev + curr;
+            break;
+        case '-':
+            result = prev - curr;
+            break;
+        case '*':
+            result = prev * curr;
+            break;
+        case '/':
+            result = curr === 0 ? 'Error' : prev / curr;
+            break;
+        case '%':
+            result = prev % curr;
+            break;
+        default:
+            return;
+    }
+
+    currentValue = result.toString();
+    operation = null;
+    previousValue = '';
+    updateDisplay();
+
+    // Unique feature: flash a fresh random background color every time "=" is pressed
+    changeBackgroundColor();
+}
+
+function changeBackgroundColor() {
+    const hue = Math.floor(Math.random() * 360);
+    document.body.style.backgroundColor = `hsl(${hue}, 55%, 20%)`;
+}
+</script>
 
 </body>
 </html>
-
-
